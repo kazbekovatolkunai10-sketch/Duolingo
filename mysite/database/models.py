@@ -59,7 +59,6 @@ class UserProfile(Base):
     user_lesson_level: Mapped[List['LessonLevel']] = relationship(back_populates='lesson_level_user',
                                                                   cascade='all, delete-orphan')
 
-
     def __repr__(self):
         return f'{self.first_name}, {self.last_name}'
 
@@ -308,3 +307,4 @@ class Achievement(Base):
     lesson_level_id: Mapped[int] = mapped_column(ForeignKey('lesson_level.id'))
 
     lesson_level: Mapped[LessonLevel] = relationship(back_populates='level_lesson')
+
