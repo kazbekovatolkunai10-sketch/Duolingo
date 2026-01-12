@@ -56,6 +56,8 @@ class UserProfile(Base):
                                                           cascade='all, delete-orphan')
     rating_user: Mapped[List['Rating']] = relationship(back_populates='user_rating',
                                                        cascade='all, delete-orphan')
+    user_lesson_level: Mapped[List['LessonLevel']] = relationship(back_populates='lesson_level_user',
+                                                                  cascade='all, delete-orphan')
 
 
     def __repr__(self):
@@ -285,15 +287,18 @@ class LessonLevel(Base):
     __tablename__ = 'lesson_level'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('profile.id'))
+    level: Mapped[int] = mapped_column(Integer, default=1)
 
+    lesson_level_user: Mapped[UserProfile] = relationship(back_populates='user_lesson_level')
     level_lesson: Mapped[List['Achievement']] = relationship(back_populates='lesson_level',
                                                              cascade='all, delete-orphan')
+
+    @property
     def add_level(self):
-        total = 1
-        for total in range(1, 101):
-            print(total)
-            total += 1
-        return total
+        if self.level < 101:
+            self.level += 1
+        return self.level
 
 
 class Achievement(Base):
