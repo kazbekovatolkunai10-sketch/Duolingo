@@ -40,7 +40,7 @@ async def detail_language(language_id: int, db: Session = Depends(get_db)):
 
 @language_router.put('/{language_id}/', response_model=dict)
 async def update_language(language_id: int, language: LanguageInputSchema,
-                             db: Session = Depends(get_db)):
+                        db: Session = Depends(get_db)):
     language_db = db.query(Language).filter(Language.id == language_id).first()
     if not language_db:
         raise HTTPException(detail='Мындай маалымат жок', status_code=400)
@@ -51,6 +51,7 @@ async def update_language(language_id: int, language: LanguageInputSchema,
     db.commit()
     db.refresh(language_db)
     return {'message': 'Успешно изменено'}
+
 
 @language_router.delete('/{language_id}/', response_model=dict)
 async def delete_language(language_id: int, db: Session = Depends(get_db)):
