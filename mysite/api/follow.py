@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from mysite.database.models import Follow
-from mysite.database.schema import FollowOutSchema, FollowInputSchema
-from mysite.database.db import SessionLocal
+from Duolingo.mysite.database.models import Follow
+from Duolingo.mysite.database.schema import FollowOutSchema, FollowInputSchema
+from Duolingo.mysite.database.db import SessionLocal
 from sqlalchemy.orm import Session
 from typing import List
 

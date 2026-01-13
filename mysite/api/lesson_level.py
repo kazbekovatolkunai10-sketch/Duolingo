@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from mysite.database.models import LessonLevel
-from mysite.database.schema import LessonLevelInputSchema, LessonLevelOutSchema
-from mysite.database.db import SessionLocal
+from Duolingo.mysite.database.models import LessonLevel
+from Duolingo.mysite.database.schema import LessonLevelInputSchema, LessonLevelOutSchema
+from Duolingo.mysite.database.db import SessionLocal
 from typing import List
 from sqlalchemy.orm import Session
 

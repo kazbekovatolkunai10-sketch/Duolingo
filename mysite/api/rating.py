@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from mysite.database.models import Rating
-from mysite.database.schema import RatingInputSchema, RatingOutSchema
-from mysite.database.db import SessionLocal
+from Duolingo.mysite.database.models import Rating
+from Duolingo.mysite.database.schema import RatingInputSchema, RatingOutSchema
+from Duolingo.mysite.database.db import SessionLocal
 from typing import List
 from sqlalchemy.orm import Session
 

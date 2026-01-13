@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from mysite.database.models import UserProfile
-from mysite.database.schema import UserProfileInputSchema, UserProfileOutSchema
-from mysite.database.db import SessionLocal
+from Duolingo.mysite.database.models import UserProfile
+from Duolingo.mysite.database.schema import UserProfileInputSchema, UserProfileOutSchema
+from Duolingo.mysite.database.db import SessionLocal
 from sqlalchemy.orm import Session
 from typing import List
 

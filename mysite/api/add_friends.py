@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from mysite.database.models import AddFriends
-from mysite.database.schema import AddFriendsInputSchema, AddFriendsOutSchema
-from mysite.database.db import SessionLocal
+from Duolingo.mysite.database.models import AddFriends
+from Duolingo.mysite.database.schema import AddFriendsInputSchema, AddFriendsOutSchema
+from Duolingo.mysite.database.db import SessionLocal
 from sqlalchemy.orm import Session
 
 add_friends_router = APIRouter(prefix='add_friends', tags=['Add Friends'])
