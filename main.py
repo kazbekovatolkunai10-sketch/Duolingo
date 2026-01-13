@@ -4,7 +4,7 @@ from Duolingo.mysite.api import (users, follow, language, superFollow, message, 
 
                                  country, rating, lesson_level, achievement, familyFollow, maxFollow,
 
-                                  user_progress, history, auth)
+                                  user_progress, history, auth, streak)
 
 
 duolingo_app = FastAPI(title='Duolingo')
@@ -24,8 +24,10 @@ duolingo_app.include_router(maxFollow.MaxFollow_router)
 
 duolingo_app.include_router(user_progress.user_progress_router)
 duolingo_app.include_router(history.history_router)
+duolingo_app.include_router(streak.Streak_router)
 
 duolingo_app.include_router(auth.auth_router)
+
 
 if __name__ == '__main__':
     uvicorn.run(duolingo_app, host='127.0.0.1', port=8000)
