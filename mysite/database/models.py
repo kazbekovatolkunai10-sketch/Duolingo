@@ -6,11 +6,11 @@ from typing import List, Optional
 from enum import Enum as PyEnum
 
 
-class RoleChoices(PyEnum, str):
+class RoleChoices(str, PyEnum):
     user = 'user'
     admin = 'admin'
 
-class LevelChoices(PyEnum, str):
+class LevelChoices(str, PyEnum):
     A1 = 'A1'
     A2 = 'A2'
     B1 = 'B1'
@@ -18,7 +18,7 @@ class LevelChoices(PyEnum, str):
     C1 = 'C1'
     C2 = 'C2'
 
-class TypeChoices(PyEnum, str):
+class TypeChoices(str, PyEnum):
     private = 'private'
     group = 'group'
 
@@ -307,4 +307,3 @@ class Achievement(Base):
     lesson_level_id: Mapped[int] = mapped_column(ForeignKey('lesson_level.id'))
 
     lesson_level: Mapped[LessonLevel] = relationship(back_populates='level_lesson')
-
