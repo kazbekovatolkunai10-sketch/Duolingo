@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from Duolingo.mysite.database.models import Rating
-from Duolingo.mysite.database.schema import RatingInputSchema, RatingOutSchema
-from Duolingo.mysite.database.db import SessionLocal
+from mysite.database.models import Rating
+from mysite.database.schema import RatingInputSchema, RatingOutSchema
+from mysite.database.db import SessionLocal
 from typing import List
 from sqlalchemy.orm import Session
 
@@ -24,7 +24,7 @@ async def create_rating(rating: RatingInputSchema, db: Session = Depends(get_db)
     return rating_db
 
 
-@rating_router.get('/', response_model=RatingOutSchema)
+@rating_router.get('/', response_model=List[RatingOutSchema])
 async def list_rating(db: Session = Depends(get_db)):
     return db.query(Rating).all()
 

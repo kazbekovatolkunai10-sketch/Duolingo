@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from Duolingo.mysite.database.models import LessonLevel
-from Duolingo.mysite.database.schema import LessonLevelInputSchema, LessonLevelOutSchema
-from Duolingo.mysite.database.db import SessionLocal
+from mysite.database.models import LessonLevel
+from mysite.database.schema import LessonLevelInputSchema, LessonLevelOutSchema
+from mysite.database.db import SessionLocal
 from typing import List
 from sqlalchemy.orm import Session
 
@@ -24,7 +24,7 @@ async def create_lesson_level(lesson_level: LessonLevelInputSchema, db: Session 
     return lesson_level_db
 
 
-@lesson_level_router.get('/', response_model=LessonLevelOutSchema)
+@lesson_level_router.get('/', response_model=List[LessonLevelOutSchema])
 async def list_lesson_level(db: Session = Depends(get_db)):
     return db.query(LessonLevel).all()
 

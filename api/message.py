@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from Duolingo.mysite.database.models import Message
-from Duolingo.mysite.database.schema import MessageInputSchema, MessageOutShema
-from Duolingo.mysite.database.db import SessionLocal
-from typing import List
+from mysite.database.models import Message
+from mysite.database.schema import MessageInputSchema, MessageOutShema
+from mysite.database.db import SessionLocal
 from sqlalchemy.orm import Session
 
 message_router = APIRouter(prefix='/message', tags=['Messages'])

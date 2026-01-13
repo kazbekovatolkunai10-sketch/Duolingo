@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from Duolingo.mysite.database.models import Achievement
-from Duolingo.mysite.database.schema import AchievementInputSchema, AchievementOutSchema
-from Duolingo.mysite.database.db import SessionLocal
+from mysite.database.models import Achievement
+from mysite.database.schema import AchievementInputSchema, AchievementOutSchema
+from mysite.database.db import SessionLocal
 from typing import List
 from sqlalchemy.orm import Session
 
@@ -24,7 +24,7 @@ async def create_achievement(achievement: AchievementInputSchema, db: Session = 
     return achievement_db
 
 
-@achievement_router.get('/', response_model=AchievementOutSchema)
+@achievement_router.get('/', response_model=List[AchievementOutSchema])
 async def list_achievement(db: Session = Depends(get_db)):
     return db.query(Achievement).all()
 

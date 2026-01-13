@@ -29,6 +29,11 @@ class UserProfileOutSchema(BaseModel):
     date_register: datetime
 
 
+class UserProfileLoginSchema(BaseModel):
+    username: str
+    password: str
+
+
 class FollowInputSchema(BaseModel):
     following_id: int
     follower_id: int

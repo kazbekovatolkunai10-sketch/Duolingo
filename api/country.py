@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from Duolingo.mysite.database.models import Country
-from Duolingo.mysite.database.schema import CountryInputSchema, CountryOutSchema
-from Duolingo.mysite.database.db import SessionLocal
-from typing import List
+from mysite.database.models import Country
+from mysite.database.schema import CountryInputSchema, CountryOutSchema
+from mysite.database.db import SessionLocal
 from sqlalchemy.orm import Session
 
 country_router = APIRouter(prefix='countries', tags=['Countries'])
