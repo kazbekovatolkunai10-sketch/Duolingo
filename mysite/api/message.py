@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from Duolingo.mysite.database.models import Message
 from Duolingo.mysite.database.schema import MessageInputSchema, MessageOutShema
 from Duolingo.mysite.database.db import SessionLocal
+from typing import List
 from sqlalchemy.orm import Session
 
 message_router = APIRouter(prefix='/messages', tags=['Messages'])
@@ -23,7 +24,7 @@ async def create_message(message: MessageInputSchema, db: Session = Depends(get_
     return message_db
 
 
-@message_router.get('/', response_model=MessageOutShema)
+@message_router.get('/', response_model=List[MessageOutShema])
 async def list_message(db: Session = Depends(get_db)):
     return db.query(Message).all()
 
