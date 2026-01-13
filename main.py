@@ -24,4 +24,4 @@ duolingo_app.include_router(history.history_router)
 duolingo_app.include_router(auth.auth_router)
 
 if __name__ == '__main__':
-    uvicorn.run(duolingo_app, host='127.0.0.1', port=8000)
+    uvicorn.run(duolingo_app, host='127.0.0.1', port=8003)
