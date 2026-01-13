@@ -1,5 +1,9 @@
 from logging.config import fileConfig
+<<<<<<< HEAD
 from Duolingo.mysite.database.models import *
+=======
+
+>>>>>>> a8a9f2bcafdaf7a62a07345efda96316d1376b51
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
