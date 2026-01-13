@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from Duolingo.mysite.database.models import SuperFollow
-from Duolingo.mysite.database.models import SuperFollowOutSchema, SuperFollowInputSchema
+from Duolingo.mysite.database.schema import SuperFollowOutSchema, SuperFollowInputSchema
 from Duolingo.mysite.database.db import SessionLocal
 from sqlalchemy.orm import Session
 from typing import List
@@ -14,7 +14,7 @@ async def get_db():
     finally:
         db.close()
 
-@super_follow_router.post("/", response_model=SuperFollowOutSchema)
+@super_follow_router.post('/', response_model=SuperFollowOutSchema)
 def create_follow(
     follow: SuperFollowInputSchema, db: Session = Depends(get_db)):
 
@@ -31,8 +31,8 @@ async def list_super_follow(db: Session = Depends(get_db)):
 
 
 @super_follow_router.get('/{super_follow_id}/', response_model=SuperFollowOutSchema)
-async def detail_user(follow_id: int, db: Session = Depends(get_db), follow_db=None):
-    follow_id = db.query(Follow).filter(Follow.id == follow_id).first()
+async def detail_user(super_follow_id: int, db: Session = Depends(get_db), follow_db=None):
+    follow_id = db.query(SuperFollow).filter(SuperFollow.id == super_follow_id).first()
 
     if not follow_db:
         raise HTTPException(detail='маалымат жок', status_code=400)

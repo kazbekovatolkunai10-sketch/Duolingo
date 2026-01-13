@@ -4,7 +4,7 @@ from Duolingo.mysite.database.schema import AddFriendsInputSchema, AddFriendsOut
 from Duolingo.mysite.database.db import SessionLocal
 from sqlalchemy.orm import Session
 
-add_friends_router = APIRouter(prefix='add_friends', tags=['Add Friends'])
+add_friends_router = APIRouter(prefix='/add_friends', tags=['Add Friends'])
 
 async def get_db():
     db = SessionLocal()

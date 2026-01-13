@@ -4,7 +4,7 @@ from Duolingo.mysite.database.schema import CountryInputSchema, CountryOutSchema
 from Duolingo.mysite.database.db import SessionLocal
 from sqlalchemy.orm import Session
 
-country_router = APIRouter(prefix='countries', tags=['Countries'])
+country_router = APIRouter(prefix='/countries', tags=['Countries'])
 
 async def get_db():
     db = SessionLocal()

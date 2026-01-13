@@ -4,7 +4,7 @@ from Duolingo.mysite.database.schema import MessageInputSchema, MessageOutShema
 from Duolingo.mysite.database.db import SessionLocal
 from sqlalchemy.orm import Session
 
-message_router = APIRouter(prefix='/message', tags=['Messages'])
+message_router = APIRouter(prefix='/messages', tags=['Messages'])
 
 async def get_db():
     db = SessionLocal()
