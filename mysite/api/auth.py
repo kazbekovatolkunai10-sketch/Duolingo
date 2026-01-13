@@ -1,6 +1,4 @@
 from fastapi import  APIRouter, Depends, HTTPException
-from sqlalchemy.testing.suite.test_reflection import users
-
 from Duolingo.mysite.database.models import UserProfile, RefreshToken
 from Duolingo.mysite.database.schema import UserProfileInputSchema, UserProfileOutSchema, UserProfileLoginSchema
 from Duolingo.mysite.database.db import SessionLocal
