@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from Duolingo.mysite.database.models import Country
 from Duolingo.mysite.database.schema import CountryInputSchema, CountryOutSchema
 from Duolingo.mysite.database.db import SessionLocal
+from typing import List
 from sqlalchemy.orm import Session
 
 country_router = APIRouter(prefix='/countries', tags=['Countries'])
@@ -23,7 +24,7 @@ async def create_country(country: CountryInputSchema, db: Session = Depends(get_
     return country_db
 
 
-@country_router.get('/', response_model=CountryOutSchema)
+@country_router.get('/', response_model=List[CountryOutSchema])
 async def list_country(db: Session = Depends(get_db)):
     return db.query(Country).all()
 
