@@ -58,9 +58,22 @@ class UserProfile(Base):
                                                        cascade='all, delete-orphan')
     user_lesson_level: Mapped[List['LessonLevel']] = relationship(back_populates='lesson_level_user',
                                                                   cascade='all, delete-orphan')
+    user_token: Mapped[List['RefreshToken']] = relationship(back_populates='token_user',
+                                                            cascade='all, delete-orphan')
 
     def __repr__(self):
         return f'{self.first_name}, {self.last_name}'
+
+
+class RefreshToken(Base):
+    __tablename__ = 'refresh_token'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('profile.id'))
+    token: Mapped[str] = mapped_column(String)
+    created_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow())
+
+    token_user: Mapped[UserProfile] = relationship(back_populates='user_token')
 
 
 class Follow(Base):
