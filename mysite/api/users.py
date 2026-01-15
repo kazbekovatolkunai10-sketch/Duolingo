@@ -17,8 +17,12 @@ async def get_db():
 
 
 @user_router.get('/', response_model=List[UserProfileOutSchema])
-async def list_user(db: Session = Depends(get_db)):
-    return db.query(UserProfile).all()
+async def list_user(user_id: int, db: Session = Depends(get_db)):
+    user_db = db.query(UserProfile).filter(UserProfile.id == user_id).first()
+
+    if not user_db:
+        raise HTTPException(detail='маалымат туура келген жок', status_code=400)
+    return user_db
 
 
 @user_router.get('/{user_id}/', response_model=UserProfileOutSchema)
