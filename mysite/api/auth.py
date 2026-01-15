@@ -4,7 +4,7 @@ from Duolingo.mysite.database.schema import UserProfileInputSchema, UserProfileO
 from Duolingo.mysite.database.db import SessionLocal
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from Duolingo.mysite.config import (SECRET_KEY, ALGORITHM,
                                     ACCESS_TOKEN_LIFETIME,
                                     REFRESH_TOKEN_LIFETIME)
@@ -50,7 +50,7 @@ def create_refresh_token(data: dict):
 @auth_router.post('/register/', response_model=dict)
 async def register(user: UserProfileInputSchema, db: Session = Depends(get_db)):
     user_db = db.query(UserProfile).filter(UserProfile.username == user.username).first()
-    email_db = db.query(UserProfile).filter(UserProfile.email == user.dict()).first()
+    email_db = db.query(UserProfile).filter(UserProfile.email == user.email).first()
     if user_db:
         raise HTTPException(detail='Мындай username бар экен', status_code=400)
     elif email_db:
@@ -58,24 +58,25 @@ async def register(user: UserProfileInputSchema, db: Session = Depends(get_db)):
 
     hash_password = get_password_hash(user.password)
     user_data = UserProfile(
+        avatar = user.avatar,
         first_name = user.first_name,
         last_name = user.last_name,
         username = user.username,
         email = user.email,
         password = hash_password,
         phone_number = user.phone_number,
-        is_activate = user.is_activate
+        is_active = user.is_active
     )
     db.add(user_data)
     db.commit()
-    db.refresh(user_db)
+    db.refresh(user_data)
     return {'message': 'Вы успешно зарегистрированы'}
 
 
 @auth_router.post('/login/', response_model=dict)
-async def login(user: UserProfileInputSchema, db: Session = Depends(get_db)):
-    user_db = db.query(UserProfile).filter(UserProfile.username == user.username).first()
-    if not user_db or not verify_password(user.password, user_db.password):
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user_db = db.query(UserProfile).filter(UserProfile.username == form_data.username).first()
+    if not user_db or not verify_password(form_data.password, user_db.password):
         raise HTTPException(detail='Сиз жазган маалымат туура эмес', status_code=401)
 
     access_token = create_access_token({'sub': user_db.username})

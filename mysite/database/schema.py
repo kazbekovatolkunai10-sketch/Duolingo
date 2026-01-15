@@ -12,7 +12,7 @@ class UserProfileInputSchema(BaseModel):
     email: EmailStr
     password: str
     phone_number: Optional[str]
-    is_activate: bool
+    is_active: bool
 
 
 class UserProfileOutSchema(BaseModel):
@@ -25,7 +25,7 @@ class UserProfileOutSchema(BaseModel):
     password: str
     phone_number: Optional[str]
     role: RoleChoices
-    is_activate: bool
+    is_active: bool
     date_register: datetime
 
 
@@ -112,6 +112,7 @@ class LessonInputSchema(BaseModel):
     title: str
     order: int
     is_locked: bool
+    xp_reward: int
 
 
 class LessonOutSchema(BaseModel):
@@ -120,6 +121,10 @@ class LessonOutSchema(BaseModel):
     title: str
     order: int
     is_locked: bool
+    xp_reward: int
+
+    class Config:
+        orm_mode = True
 
 
 class ExerciseInputSchema(BaseModel):
@@ -259,9 +264,8 @@ class RatingOutSchema(BaseModel):
 class LessonLevelInputSchema(BaseModel):
     user_id: int
     level: int
-
-    class Config:
-        from_attributes = True
+    experience: int
+    max_level: int
 
 
 class LessonLevelOutSchema(BaseModel):
@@ -270,7 +274,20 @@ class LessonLevelOutSchema(BaseModel):
     level: int
 
     class Config:
-        from_attributes = True
+        orm_mode = True
+
+
+class LessonCompletionInputSchema(BaseModel):
+    lesson_id: int
+
+
+class LessonCompletionOutSchema(BaseModel):
+    id: int
+    user_id: int
+    lesson_id: int
+
+    class Config:
+        orm_mode = True
 
 
 class AchievementInputSchema(BaseModel):

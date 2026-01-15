@@ -1,7 +1,8 @@
 from .db import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, ForeignKey, DateTime, Date, Boolean, Text, Enum
-from datetime import date, datetime
+from sqlalchemy import Integer, String, ForeignKey, DateTime, Date, Boolean, Text, Enum, CheckConstraint, \
+    UniqueConstraint
+from datetime import date, datetime, timedelta
 from typing import List, Optional
 from enum import Enum as PyEnum
 
@@ -44,6 +45,8 @@ class UserProfile(Base):
                                                          cascade='all, delete-orphan', foreign_keys='Follow.follower_id')
     user_progress: Mapped[List['UserProgres']] = relationship(back_populates='progress_user',
                                                               cascade='all, delete-orphan')
+    lesson_user: Mapped[List['LessonLevel']] = relationship(back_populates='user_lesson',
+                                                            cascade='all, delete-orphan')
     history_user: Mapped[List['XPHistory']] = relationship(back_populates='user_history',
                                                            cascade='all, delete-orphan')
     user_streak: Mapped[List['Streak']] = relationship(back_populates='streak_user',
@@ -56,10 +59,13 @@ class UserProfile(Base):
                                                           cascade='all, delete-orphan')
     rating_user: Mapped[List['Rating']] = relationship(back_populates='user_rating',
                                                        cascade='all, delete-orphan')
-    user_lesson_level: Mapped[List['LessonLevel']] = relationship(back_populates='lesson_level_user',
-                                                                  cascade='all, delete-orphan')
     user_token: Mapped[List['RefreshToken']] = relationship(back_populates='token_user',
                                                             cascade='all, delete-orphan')
+    achievement_user: Mapped[List['UserAchievement']] = relationship(back_populates='user_achievement',
+                                                                     cascade='all, delete-orphan')
+    complete_user: Mapped[List['LessonCompletion']] = relationship(back_populates='user_complete',
+                                                                   cascade='all, delete-orphan')
+
 
     def __repr__(self):
         return f'{self.first_name}, {self.last_name}'
@@ -149,6 +155,7 @@ class Lesson(Base):
     title: Mapped[str] = mapped_column(String)
     order: Mapped[int] = mapped_column(Integer)
     is_locked: Mapped[bool] = mapped_column(Boolean, default=False)
+    xp_reward: Mapped[int] = mapped_column(Integer, default=10)
 
 
     course_lesson: Mapped[Course] = relationship(back_populates='lesson_course')
@@ -156,6 +163,10 @@ class Lesson(Base):
                                                              cascade='all, delete-orphan')
     progress_lesson: Mapped[List['UserProgres']] = relationship(back_populates='lesson_progress',
                                                                 cascade='all, delete')
+    lesson_level: Mapped[List['LessonLevel']] = relationship(back_populates='lesson',
+                                                             cascade='all, delete-orphan')
+    complete_lesson: Mapped[List['LessonCompletion']] = relationship(back_populates='lesson_complete',
+                                                                     cascade='all, delete-orphan')
 
 class Exercise(Base):
     __tablename__ = 'exercise'
@@ -184,16 +195,16 @@ class Option(Base):
 class UserProgres(Base):
     __tablename__ = 'user_progress'
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('profile.id'))
     lesson_id: Mapped[int] = mapped_column(ForeignKey('lesson.id'))
     completed: Mapped[bool] = mapped_column(Boolean, default=False)
-    score: Mapped[int] = mapped_column(Integer)
+    score: Mapped[int] = mapped_column(Integer, default=0)
+    xp_earned: Mapped[int] = mapped_column(Integer, default=10)
     completed_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-
-    progress_user: Mapped[UserProfile] = relationship(back_populates='user_progress')
-    lesson_progress: Mapped[Lesson] = relationship(back_populates='progress_lesson')
+    progress_user: Mapped['UserProfile'] = relationship(back_populates='user_progress')
+    lesson_progress: Mapped['Lesson'] = relationship(back_populates='progress_lesson')
 
 
 class XPHistory(Base):
@@ -213,13 +224,30 @@ class Streak(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('profile.id'))
-    current_steak: Mapped[int] = mapped_column(Integer)
-    last_activity: Mapped[date] = mapped_column(Date, default=date.today)
+    current_steak: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    last_activity: Mapped[date] = mapped_column(Date, default=date.today, nullable=False)
 
 
     streak_user: Mapped[UserProfile] = relationship(back_populates='user_streak')
     rating_streak: Mapped[List['Rating']] = relationship(back_populates='streak_rating',
                                                          cascade='all, delete-orphan')
+
+    def update_after_lesson(self):
+        if self.last_activity is None:
+            self.last_activity = date.today()
+
+        today = date.today()
+
+        if self.last_activity == today:
+            return self.current_steak
+
+        if self.last_activity == today - timedelta(days=1):
+            self.current_steak += 1
+        else:
+            self.current_steak = 1
+
+        self.last_activity = today
+        return self.current_steak
 
 
 class Chat(Base):
@@ -298,25 +326,91 @@ class Rating(Base):
 class LessonLevel(Base):
     __tablename__ = 'lesson_level'
 
+    __table_args__  = (
+        CheckConstraint(
+        'level >= 1 AND level <= 100',
+        name='check_lesson_level_range'
+        ),
+    )
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('profile.id'))
-    level: Mapped[int] = mapped_column(Integer, default=1)
+    lesson_id: Mapped[int] = mapped_column(ForeignKey('lesson.id'))
+    level: Mapped[int] = mapped_column(Integer, default=1, server_default='1', nullable=False)
+    experience: Mapped[int] = mapped_column(Integer, default=0, server_default='0', nullable=False)
+    max_level: Mapped[int] = mapped_column(Integer, default=100, server_default='100', nullable=False)
 
-    lesson_level_user: Mapped[UserProfile] = relationship(back_populates='user_lesson_level')
-    level_lesson: Mapped[List['Achievement']] = relationship(back_populates='lesson_level',
-                                                             cascade='all, delete-orphan')
+    user_lesson: Mapped[UserProfile] = relationship(back_populates='lesson_user')
+    lesson: Mapped[Lesson] = relationship(back_populates='lesson_level')
 
-    @property
-    def add_level(self):
-        if self.level < 101:
-            self.level += 1
+    def exp_to_next_level(self):
+        if self.level is None:
+            self.level = 1
+        return 100 * self.level
+
+    def add_level(self, step: int = 1):
+        if self.level is None:
+            self.level = 1
+        if self.max_level is None:
+            self.max_level = 100
+
+        if self.level >= self.max_level:
+            return self.level
+
+        self.level = min(self.level + step, self.max_level)
         return self.level
+
+    def add_experience(self, xp: int = 0):
+        if self.level is None:
+            self.level = 1
+        if self.experience is None:
+            self.experience = 0
+
+        self.experience += xp
+
+        while self.experience >= self.exp_to_next_level():
+            self.experience -= self.exp_to_next_level()
+            self.add_level()
+
+        return self.level
+
+
+class LessonCompletion(Base):
+    __tablename__ = 'lesson_completion'
+    __table_args__ = (
+        UniqueConstraint(
+            'user_id', 'lesson_id',
+            name='user_lesson_unique'
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('profile.id'))
+    lesson_id: Mapped[int] = mapped_column(ForeignKey('lesson.id'))
+    date_completed: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow())
+
+    user_complete: Mapped[UserProfile] = relationship(back_populates='complete_user')
+    lesson_complete: Mapped[Lesson] = relationship(back_populates='complete_lesson')
 
 
 class Achievement(Base):
     __tablename__ = 'achievement'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    lesson_level_id: Mapped[int] = mapped_column(ForeignKey('lesson_level.id'))
+    title: Mapped[str] = mapped_column(String, unique=True)
+    code: Mapped[str] = mapped_column(String, unique=True)
 
-    lesson_level: Mapped[LessonLevel] = relationship(back_populates='level_lesson')
+    user_achievement: Mapped[List['UserAchievement']] = relationship(back_populates='achievement_user',
+                                                                     cascade='all, delete-orphan')
+
+
+class UserAchievement(Base):
+    __tablename__ = 'user_achievement'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('profile.id'))
+    achievement_id: Mapped[int] = mapped_column(ForeignKey('achievement.id'))
+    date_received: Mapped[DateTime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    user_achievement: Mapped[UserProfile] = relationship(back_populates='achievement_user')
+    achievement_user: Mapped[Achievement] = relationship(back_populates='user_achievement')

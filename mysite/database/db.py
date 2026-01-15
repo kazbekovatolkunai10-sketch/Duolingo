@@ -2,7 +2,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.engine import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 
-DB_URL = 'postgresql://postgres:admin@localhost/duolingo-fast'
+DB_URL = 'postgresql://postgres:iskak228@localhost/Duolinggo'
 
 engine = create_engine(DB_URL)
 
