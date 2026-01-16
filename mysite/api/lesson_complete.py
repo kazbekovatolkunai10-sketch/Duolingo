@@ -26,29 +26,25 @@ async def complete_lesson(lesson_complete: LessonCompletionInputSchema, user: Us
 
     completed = db.query(LessonCompletion).filter(
         LessonCompletion.user_id == user.id,
-        LessonCompletion.lesson_id == lesson_id
-    ).first()
+        LessonCompletion.lesson_id == lesson_id).first()
 
     if completed:
         raise HTTPException(status_code=400, detail='Урок уже завершён')
 
     lesson = db.query(Lesson).filter(
-        Lesson.id == lesson_id
-    ).first()
+        Lesson.id == lesson_id).first()
 
     if not lesson:
-        raise HTTPException(status_code=404, detail='Урок не найден')
+        raise HTTPException(status_code=400, detail='Урок не найден')
 
     completion = LessonCompletion(
         user_id=user.id,
-        lesson_id=lesson_id
-    )
+        lesson_id=lesson_id)
     db.add(completion)
 
     lesson_level = db.query(LessonLevel).filter(
         LessonLevel.user_id == user.id,
-        LessonLevel.lesson_id == lesson_id
-    ).first()
+        LessonLevel.lesson_id == lesson_id).first()
 
     if not lesson_level:
         lesson_level = LessonLevel(

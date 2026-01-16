@@ -35,8 +35,7 @@ def get_current_user(
 
     user = (
         db.query(UserProfile)
-        .filter(UserProfile.username == username).first()
-    )
+        .filter(UserProfile.username == username).first())
 
     if user is None:
         raise credentials_exception

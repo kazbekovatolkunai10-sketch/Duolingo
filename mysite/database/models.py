@@ -1,7 +1,6 @@
 from .db import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, ForeignKey, DateTime, Date, Boolean, Text, Enum, CheckConstraint, \
-    UniqueConstraint
+from sqlalchemy import Integer, String, ForeignKey, DateTime, Date, Boolean, Text, Enum, CheckConstraint, UniqueConstraint
 from datetime import date, datetime, timedelta
 from typing import List, Optional
 from enum import Enum as PyEnum
@@ -326,12 +325,6 @@ class Rating(Base):
 class LessonLevel(Base):
     __tablename__ = 'lesson_level'
 
-    __table_args__  = (
-        CheckConstraint(
-        'level >= 1 AND level <= 100',
-        name='check_lesson_level_range'
-        ),
-    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('profile.id'))
