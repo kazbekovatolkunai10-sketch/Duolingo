@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 from datetime import date, datetime
 from .models import RoleChoices, LevelChoices, TypeChoices
 
@@ -51,6 +51,55 @@ class UserListSchema(BaseModel):
     avatar: Optional[str]
     first_name: Optional[str]
     last_name: Optional[str]
+
+
+class UserProfileListSchema(BaseModel):
+    id: int
+    avatar: Optional[str]
+    first_name: str
+    last_name: str
+    username: str
+
+    level: int
+    streak: int
+
+    class Config:
+        from_attributes = True
+
+
+class LessonLevelInputSchema(BaseModel):
+    course_id: int
+    level: int
+    experience: int
+    max_level: int
+
+
+class LessonLevelOutSchema(BaseModel):
+    id: int
+    course_id: int
+    level: int
+    experience: int
+    xp_to_next_level: int
+
+
+class AchievementMiniOutSchema(BaseModel):
+    id: int
+    title: str
+
+
+class UserProfileDetailSchema(BaseModel):
+    id: int
+    avatar: Optional[str]
+    first_name: str
+    last_name: str
+    username: str
+
+    streak: int
+    levels: List[LessonLevelOutSchema]
+    achievements: List[AchievementMiniOutSchema]
+
+    class Config:
+        from_attributes = True
 
 
 class FollowInputSchema(BaseModel):
@@ -269,22 +318,6 @@ class RatingOutSchema(BaseModel):
     id: int
     user_id: int
     streak_id: int
-
-
-class LessonLevelInputSchema(BaseModel):
-    user_id: int
-    level: int
-    experience: int
-    max_level: int
-
-
-class LessonLevelOutSchema(BaseModel):
-    id: int
-    user_id: int
-    level: int
-
-    class Config:
-        from_attributes = True
 
 
 class LessonCompletionInputSchema(BaseModel):

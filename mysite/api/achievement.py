@@ -20,10 +20,8 @@ def give_achievement_if_not_exists(db: Session, user_id: int, code: str) -> bool
     if not achievement:
         return False
 
-    exists = db.query(UserAchievement).filter(
-        UserAchievement.user_id == user_id,
-        UserAchievement.achievement_id == achievement.id
-    ).first()
+    exists = db.query(UserAchievement).filter(UserAchievement.user_id == user_id,
+                                              UserAchievement.achievement_id == achievement.id).first()
 
     if exists:
         return False

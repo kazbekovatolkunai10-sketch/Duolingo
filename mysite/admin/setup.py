@@ -1,7 +1,7 @@
 from .views import (UserProfileAdmin, FollowAdmin, SuperFollowAdmin,
                     FamilyFollowAdmin, MaxFollowAdmin, LanguageAdmin,
                     CourseAdmin, LessonAdmin, ExerciseAdmin,
-                    OptionAdmin, UserProgresAdmin, XPHistoryAdmin,
+                    OptionAdmin, UserProgressAdmin, XPHistoryAdmin,
                     StreakAdmin, ChatAdmin, ChatMemberAdmin,
                     MessageAdmin, AddFriendsAdmin, CountryAdmin,
                     RatingAdmin, LessonLevelAdmin, AchievementAdmin)
@@ -22,7 +22,7 @@ def setup_admin(mysite_app: FastAPI):
     admin.add_view(LessonAdmin)
     admin.add_view(ExerciseAdmin)
     admin.add_view(OptionAdmin)
-    admin.add_view(UserProgresAdmin)
+    admin.add_view(UserProgressAdmin)
     admin.add_view(XPHistoryAdmin)
     admin.add_view(StreakAdmin)
     admin.add_view(ChatAdmin)

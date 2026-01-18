@@ -75,7 +75,7 @@ async def register(user: UserProfileInputSchema, db: Session = Depends(get_db)):
 
 
 @auth_router.post('/login/', response_model=dict)
-async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+async def login(form_data: UserProfileLoginSchema, db: Session = Depends(get_db)):
     user_db = db.query(UserProfile).filter(UserProfile.username == form_data.username).first()
     if not user_db or not verify_password(form_data.password, user_db.password):
         raise HTTPException(detail='Сиз жазган маалымат туура эмес', status_code=401)

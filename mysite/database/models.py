@@ -54,7 +54,7 @@ class UserProfile(Base):
                                                           cascade='all, delete-orphan', foreign_keys='Follow.following_id')
     follower_user: Mapped[List['Follow']] = relationship(back_populates='follower',
                                                          cascade='all, delete-orphan', foreign_keys='Follow.follower_id')
-    user_progress: Mapped[List['UserProgres']] = relationship(back_populates='progress_user',
+    user_progress: Mapped[List['UserProgress']] = relationship(back_populates='progress_user',
                                                               cascade='all, delete-orphan')
     lesson_user: Mapped[List['LessonLevel']] = relationship(back_populates='user_lesson',
                                                             cascade='all, delete-orphan')
@@ -155,6 +155,8 @@ class Course(Base):
     language: Mapped[Language] = relationship(back_populates='course_language')
     lesson_course: Mapped[List['Lesson']] = relationship(back_populates='course_lesson',
                                                          cascade='all, delete-orphan')
+    lesson_level: Mapped[List['LessonLevel']] = relationship(back_populates='course',
+                                                             cascade='all, delete-orphan')
 
 class Lesson(Base):
     __tablename__ = 'lesson'
@@ -170,10 +172,8 @@ class Lesson(Base):
     course_lesson: Mapped[Course] = relationship(back_populates='lesson_course')
     exercise_lesson: Mapped[List['Exercise']] = relationship(back_populates='lesson',
                                                              cascade='all, delete-orphan')
-    progress_lesson: Mapped[List['UserProgres']] = relationship(back_populates='lesson_progress',
+    progress_lesson: Mapped[List['UserProgress']] = relationship(back_populates='lesson_progress',
                                                                 cascade='all, delete')
-    lesson_level: Mapped[List['LessonLevel']] = relationship(back_populates='lesson',
-                                                             cascade='all, delete-orphan')
     complete_lesson: Mapped[List['LessonCompletion']] = relationship(back_populates='lesson_complete',
                                                                      cascade='all, delete-orphan')
 
@@ -201,7 +201,7 @@ class Option(Base):
     exercise: Mapped[Exercise] = relationship(back_populates='option')
 
 
-class UserProgres(Base):
+class UserProgress(Base):
     __tablename__ = 'user_progress'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -242,10 +242,12 @@ class Streak(Base):
                                                          cascade='all, delete-orphan')
 
     def update_after_lesson(self):
-        if self.last_activity is None:
-            self.last_activity = date.today()
-
         today = date.today()
+
+        if self.last_activity is None:
+            self.current_streak = 1
+            self.last_activity = today
+            return self.current_streak
 
         if self.last_activity == today:
             return self.current_streak
@@ -325,48 +327,53 @@ class Rating(Base):
 
 class LessonLevel(Base):
     __tablename__ = 'lesson_level'
-
+    __table_args__ = (UniqueConstraint('user_id', 'course_id'),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('profile.id'))
-    lesson_id: Mapped[int] = mapped_column(ForeignKey('lesson.id'))
+    course_id: Mapped[int] = mapped_column(ForeignKey('course.id'))
     level: Mapped[int] = mapped_column(Integer, default=1, server_default='1', nullable=False)
     experience: Mapped[int] = mapped_column(Integer, default=0, server_default='0', nullable=False)
     max_level: Mapped[int] = mapped_column(Integer, default=100, server_default='100', nullable=False)
 
     user_lesson: Mapped[UserProfile] = relationship(back_populates='lesson_user')
-    lesson: Mapped[Lesson] = relationship(back_populates='lesson_level')
+    course: Mapped[Course] = relationship(back_populates='lesson_level')
 
-    def exp_to_next_level(self):
-        if self.level is None:
-            self.level = 1
-        return 100 * self.level
+    def exp_required_for_next(self) -> int:
+        level = self.level or 1
+        return 100 * level
 
-    def add_level(self, step: int = 1):
+    def xp_to_next_level(self) -> int:
+        need = self.exp_required_for_next()
+        exp = self.experience or 0
+        return max(0, need - exp)
+
+    def add_level(self, step: int = 1) -> int:
         if self.level is None:
             self.level = 1
         if self.max_level is None:
             self.max_level = 100
 
-        if self.level >= self.max_level:
-            return self.level
-
         self.level = min(self.level + step, self.max_level)
         return self.level
 
-    def add_experience(self, xp: int = 0):
+    def add_experience(self, xp: int) -> None:
         if self.level is None:
             self.level = 1
         if self.experience is None:
             self.experience = 0
+        if self.max_level is None:
+            self.max_level = 100
 
         self.experience += xp
 
-        while self.experience >= self.exp_to_next_level():
-            self.experience -= self.exp_to_next_level()
-            self.add_level()
+        while self.level < self.max_level:
+            need = self.exp_required_for_next()
+            if self.experience < need:
+                break
 
-        return self.level
+            self.experience -= need
+            self.add_level(1)
 
 
 class LessonCompletion(Base):
