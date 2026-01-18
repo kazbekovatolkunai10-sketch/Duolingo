@@ -5,12 +5,10 @@ from .views import (UserProfileAdmin, FollowAdmin, SuperFollowAdmin,
                     StreakAdmin, ChatAdmin, ChatMemberAdmin,
                     MessageAdmin, AddFriendsAdmin, CountryAdmin,
                     RatingAdmin, LessonLevelAdmin, AchievementAdmin)
-
-
-
 from fastapi import FastAPI
 from sqladmin import Admin
 from Duolingo.mysite.database.db import engine
+
 
 def setup_admin(mysite_app: FastAPI):
     admin = Admin(mysite_app, engine)

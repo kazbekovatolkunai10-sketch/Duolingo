@@ -5,7 +5,7 @@ from Duolingo.mysite.database.db import SessionLocal
 from sqlalchemy.orm import Session
 from typing import List
 
-super_follow_router = APIRouter(prefix='/super_follow', tags=['super_follow CRUD'])
+super_follow_router = APIRouter(prefix='/super_follow', tags=['Super Follow'])
 
 async def get_db():
     db = SessionLocal()
@@ -31,28 +31,29 @@ async def list_super_follow(db: Session = Depends(get_db)):
 
 
 @super_follow_router.get('/{super_follow_id}/', response_model=SuperFollowOutSchema)
-async def detail_user(super_follow_id: int, db: Session = Depends(get_db), follow_db=None):
-    SuperFollow_id = db.query(SuperFollow).filter(SuperFollow.id == super_follow_id).first()
+async def detail_user(super_follow_id: int, db: Session = Depends(get_db)):
+    super_follow_db = db.query(SuperFollow).filter(SuperFollow.id == super_follow_id).first()
 
-    if not follow_db:
+    if not super_follow_db:
         raise HTTPException(detail='маалымат жок', status_code=400)
 
-    return follow_db
+    return super_follow_db
+
 
 @super_follow_router.put('/{super_follow_id}/', response_model=dict)
-async def update_superFollow(follow_id: int, follow: SuperFollowInputSchema,
-    db: Session = Depends(get_db)):
+async def update_super_follow(follow_id: int, follow: SuperFollowInputSchema,
+                             db: Session = Depends(get_db)):
 
-    follow.db = (db.query(SuperFollow).filter(SuperFollow.id == follow_id).first())
+    follow_db = (db.query(SuperFollow).filter(SuperFollow.id == follow_id).first())
 
-    if not follow.db:
+    if not follow_db:
         raise HTTPException(detail='Мындай follow жок',status_code=400)
 
     for follow_key, follow_value in follow.dict().items():
-        setattr(follow.db, follow_key, follow_value)
+        setattr(follow_db, follow_key, follow_value)
 
     db.commit()
-    db.refresh(follow.db)
+    db.refresh(follow_db)
 
     return {'message': 'SuperFollow өзгөртүлдү'}
 

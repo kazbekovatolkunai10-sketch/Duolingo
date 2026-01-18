@@ -4,6 +4,17 @@ from datetime import date, datetime
 from .models import RoleChoices, LevelChoices, TypeChoices
 
 
+class CountryInputSchema(BaseModel):
+    country_image: str
+    country_name: str
+
+
+class CountryOutSchema(BaseModel):
+    id: int
+    country_image: str
+    country_name: str
+
+
 class UserProfileInputSchema(BaseModel):
     avatar: str
     first_name: str
@@ -13,6 +24,7 @@ class UserProfileInputSchema(BaseModel):
     password: str
     phone_number: Optional[str]
     is_active: bool
+    country_id: int
 
 
 class UserProfileOutSchema(BaseModel):
@@ -26,12 +38,19 @@ class UserProfileOutSchema(BaseModel):
     phone_number: Optional[str]
     role: RoleChoices
     is_active: bool
+    country_id: int
     date_register: datetime
 
 
 class UserProfileLoginSchema(BaseModel):
     username: str
     password: str
+
+
+class UserListSchema(BaseModel):
+    avatar: Optional[str]
+    first_name: Optional[str]
+    last_name: Optional[str]
 
 
 class FollowInputSchema(BaseModel):
@@ -124,7 +143,7 @@ class LessonOutSchema(BaseModel):
     xp_reward: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ExerciseInputSchema(BaseModel):
@@ -241,15 +260,6 @@ class AddFriendsOutSchema(BaseModel):
     user_id: int
 
 
-class CountryInputSchema(BaseModel):
-    user_id: int
-
-
-class CountryOutSchema(BaseModel):
-    id: int
-    user_id: int
-
-
 class RatingInputSchema(BaseModel):
     user_id: int
     streak_id: int
@@ -274,7 +284,7 @@ class LessonLevelOutSchema(BaseModel):
     level: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class LessonCompletionInputSchema(BaseModel):
@@ -287,7 +297,18 @@ class LessonCompletionOutSchema(BaseModel):
     lesson_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+
+class CompleteLessonResponseSchema(BaseModel):
+    completion: LessonCompletionOutSchema
+    level: int
+    experience: int
+    xp_to_next_level: int
+    streak: int
+
+    class Config:
+        from_attributes = True
 
 
 class AchievementInputSchema(BaseModel):

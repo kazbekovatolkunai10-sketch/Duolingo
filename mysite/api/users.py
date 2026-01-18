@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from Duolingo.mysite.database.models import UserProfile
-from Duolingo.mysite.database.schema import UserProfileInputSchema, UserProfileOutSchema
+from Duolingo.mysite.database.schema import UserProfileInputSchema, UserProfileOutSchema, UserListSchema
 from Duolingo.mysite.database.db import SessionLocal
 from sqlalchemy.orm import Session
 from typing import List
 
-user_router = APIRouter(prefix='/users', tags=['User CRUD'])
+user_router = APIRouter(prefix='/users', tags=['Users'])
 
 
 async def get_db():
@@ -16,7 +16,7 @@ async def get_db():
         db.close()
 
 
-@user_router.get('/', response_model=List[UserProfileOutSchema])
+@user_router.get('/', response_model=UserListSchema)
 async def list_user(user_id: int, db: Session = Depends(get_db)):
     user_db = db.query(UserProfile).filter(UserProfile.id == user_id).first()
 

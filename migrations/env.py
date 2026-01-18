@@ -1,5 +1,10 @@
+import os
+import sys
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.append(BASE_DIR)
 from logging.config import fileConfig
-from mysite.database.models import *
+from Duolingo.mysite.database.db import Base
+from Duolingo.mysite.database import models
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context

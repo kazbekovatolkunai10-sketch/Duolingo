@@ -65,7 +65,8 @@ async def register(user: UserProfileInputSchema, db: Session = Depends(get_db)):
         email = user.email,
         password = hash_password,
         phone_number = user.phone_number,
-        is_active = user.is_active
+        is_active = user.is_active,
+        country_id = user.country_id
     )
     db.add(user_data)
     db.commit()

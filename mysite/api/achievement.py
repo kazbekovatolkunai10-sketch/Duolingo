@@ -28,7 +28,6 @@ def give_achievement_if_not_exists(db: Session, user_id: int, code: str) -> bool
     if exists:
         return False
 
-    # Выдаём
     db.add(UserAchievement(user_id=user_id, achievement_id=achievement.id))
     return True
 

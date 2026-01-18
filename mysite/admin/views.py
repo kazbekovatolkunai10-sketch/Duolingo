@@ -1,4 +1,8 @@
-from Duolingo.mysite.database.models import UserProfile, RefreshToken, Follow, SuperFollow, FamilyFollow, MaxFollow, Language, Course, Lesson, Exercise, Option, UserProgres, XPHistory, Streak, Chat, ChatMember, Message, AddFriends, Country, Rating, LessonLevel, Achievement, UserAchievement, LessonCompletion
+from Duolingo.mysite.database.models import (UserProfile, RefreshToken, Follow, SuperFollow, FamilyFollow,
+                                             MaxFollow, Language, Course, Lesson, Exercise, Option,
+                                             UserProgres, XPHistory, Streak, Chat, ChatMember, Message,
+                                             AddFriends, Country, Rating, LessonLevel, Achievement,
+                                             UserAchievement, LessonCompletion)
 from sqladmin import ModelView
 
 
@@ -9,7 +13,7 @@ class RefreshTokenAdmin(ModelView, model=RefreshToken):
     column_list = [RefreshToken.token]
 
 class FollowAdmin(ModelView, model=Follow):
-    column_list = [Follow.following.username]
+    column_list = [Follow.following_id, Follow.follower_id]
 
 class SuperFollowAdmin(ModelView, model=SuperFollow):
     column_list = [SuperFollow.title]
@@ -33,7 +37,7 @@ class ExerciseAdmin(ModelView, model=Exercise):
     column_list = [Exercise.questions]
 
 class OptionAdmin(ModelView, model=Option):
-    column_list = [Option.exercise.questions]
+    column_list = [Option.exercise_id]
 
 class UserProgresAdmin(ModelView, model=UserProgres):
     column_list = [UserProgres.completed]
@@ -42,7 +46,7 @@ class XPHistoryAdmin(ModelView, model=XPHistory):
     column_list = [XPHistory.reason]
 
 class StreakAdmin(ModelView, model=Streak):
-    column_list = [Streak.current_steak]
+    column_list = [Streak.current_streak]
 
 class ChatAdmin(ModelView, model=Chat):
     column_list = [Chat.type]
@@ -54,13 +58,13 @@ class MessageAdmin(ModelView, model=Message):
     column_list = [Message.content]
 
 class AddFriendsAdmin(ModelView, model=AddFriends):
-    column_list = [AddFriends.add_user.username]
+    column_list = [AddFriends.user_id]
 
 class CountryAdmin(ModelView, model=Country):
-    column_list = [Country.user_country.username]
+    column_list = [Country.country_image, Country.country_name]
 
 class RatingAdmin(ModelView, model=Rating):
-    column_list = [Rating.user_rating.username, Rating.streak_rating.current_streak]
+    column_list = [Rating.user_id, Rating.streak_id]
 
 class LessonLevelAdmin(ModelView, model=LessonLevel):
     column_list = [LessonLevel.level]
@@ -73,7 +77,3 @@ class AchievementAdmin(ModelView, model=Achievement):
 
 class UserAchievementAdmin(ModelView, model=UserAchievement):
     column_list = [UserAchievement.date_received]
-
-
-
-

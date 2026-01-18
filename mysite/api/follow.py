@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 
-follow_router = APIRouter(prefix='/follow', tags=['Follow CRUD'])
+follow_router = APIRouter(prefix='/follow', tags=['Follow'])
 
 
 async def get_db():
@@ -32,8 +32,8 @@ async def list_user(db: Session = Depends(get_db)):
 
 
 @follow_router.get('/{follow_id}/', response_model=FollowOutSchema)
-async def detail_user(follow_id: int, db: Session = Depends(get_db), follow_db=None):
-    follow_id = db.query(Follow).filter(Follow.id == follow_id).first()
+async def detail_user(follow_id: int, db: Session = Depends(get_db)):
+    follow_db = db.query(Follow).filter(Follow.id == follow_id).first()
 
     if not follow_db:
         raise HTTPException(detail='маалымат жок', status_code=400)
@@ -42,18 +42,18 @@ async def detail_user(follow_id: int, db: Session = Depends(get_db), follow_db=N
 
 @follow_router.put('/{follow_id}/', response_model=dict)
 async def update_follow(follow_id: int, follow: FollowInputSchema,
-    db: Session = Depends(get_db)):
+                        db: Session = Depends(get_db)):
 
-    follow.db = (db.query(Follow).filter(Follow.id == follow_id).first())
+    follow_db = (db.query(Follow).filter(Follow.id == follow_id).first())
 
-    if not follow.db:
+    if not follow_db:
         raise HTTPException(detail='Мындай follow жок',status_code=400)
 
     for follow_key, follow_value in follow.dict().items():
-        setattr(follow.db, follow_key, follow_value)
+        setattr(follow_db, follow_key, follow_value)
 
     db.commit()
-    db.refresh(follow.db)
+    db.refresh(follow_db)
 
     return {'message': 'follow өзгөртүлдү'}
 

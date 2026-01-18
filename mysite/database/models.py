@@ -22,10 +22,22 @@ class TypeChoices(str, PyEnum):
     private = 'private'
     group = 'group'
 
+class Country(Base):
+    __tablename__ = 'country'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    country_image: Mapped[str] = mapped_column(String)
+    country_name: Mapped[str] = mapped_column(String, unique=True)
+
+    user_country: Mapped[List['UserProfile']] = relationship(back_populates='country_user',
+                                                             cascade='all, delete-orphan')
+
+
 class UserProfile(Base):
     __tablename__ = 'profile'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    country_id: Mapped[int] = mapped_column(ForeignKey('country.id'))
     avatar: Mapped[Optional[str]] = mapped_column(String)
     first_name: Mapped[str] = mapped_column(String(50))
     last_name: Mapped[str] = mapped_column(String(60))
@@ -37,7 +49,7 @@ class UserProfile(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=False)
     date_register: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-
+    country_user: Mapped[Country] = relationship(back_populates='user_country')
     following_user: Mapped[List['Follow']] = relationship(back_populates='following',
                                                           cascade='all, delete-orphan', foreign_keys='Follow.following_id')
     follower_user: Mapped[List['Follow']] = relationship(back_populates='follower',
@@ -54,8 +66,6 @@ class UserProfile(Base):
                                                            cascade='all, delete-orphan')
     user_add: Mapped[List['AddFriends']] = relationship(back_populates='add_user',
                                                         cascade='all, delete-orphan')
-    country_user: Mapped[List['Country']] = relationship(back_populates='user_country',
-                                                          cascade='all, delete-orphan')
     rating_user: Mapped[List['Rating']] = relationship(back_populates='user_rating',
                                                        cascade='all, delete-orphan')
     user_token: Mapped[List['RefreshToken']] = relationship(back_populates='token_user',
@@ -76,7 +86,7 @@ class RefreshToken(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('profile.id'))
     token: Mapped[str] = mapped_column(String)
-    created_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow())
+    created_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     token_user: Mapped[UserProfile] = relationship(back_populates='user_token')
 
@@ -223,7 +233,7 @@ class Streak(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('profile.id'))
-    current_steak: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    current_streak: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     last_activity: Mapped[date] = mapped_column(Date, default=date.today, nullable=False)
 
 
@@ -238,15 +248,15 @@ class Streak(Base):
         today = date.today()
 
         if self.last_activity == today:
-            return self.current_steak
+            return self.current_streak
 
         if self.last_activity == today - timedelta(days=1):
-            self.current_steak += 1
+            self.current_streak += 1
         else:
-            self.current_steak = 1
+            self.current_streak = 1
 
         self.last_activity = today
-        return self.current_steak
+        return self.current_streak
 
 
 class Chat(Base):
@@ -300,15 +310,6 @@ class AddFriends(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('profile.id'))
 
     add_user: Mapped[UserProfile] = relationship(back_populates='user_add')
-
-
-class Country(Base):
-    __tablename__ = 'country'
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey('profile.id'))
-
-    user_country: Mapped[UserProfile] = relationship(back_populates='country_user')
 
 
 class Rating(Base):
@@ -378,9 +379,9 @@ class LessonCompletion(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey('profile.id'))
-    lesson_id: Mapped[int] = mapped_column(ForeignKey('lesson.id'))
-    date_completed: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow())
+    user_id: Mapped[int] = mapped_column(ForeignKey('profile.id'), index=True)
+    lesson_id: Mapped[int] = mapped_column(ForeignKey('lesson.id'), index=True)
+    date_completed: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     user_complete: Mapped[UserProfile] = relationship(back_populates='complete_user')
     lesson_complete: Mapped[Lesson] = relationship(back_populates='complete_lesson')
@@ -401,9 +402,9 @@ class UserAchievement(Base):
     __tablename__ = 'user_achievement'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey('profile.id'))
-    achievement_id: Mapped[int] = mapped_column(ForeignKey('achievement.id'))
-    date_received: Mapped[DateTime] = mapped_column(DateTime, default=datetime.utcnow)
+    user_id: Mapped[int] = mapped_column(ForeignKey('profile.id'), index=True)
+    achievement_id: Mapped[int] = mapped_column(ForeignKey('achievement.id'), index=True)
+    date_received: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     user_achievement: Mapped[UserProfile] = relationship(back_populates='achievement_user')
     achievement_user: Mapped[Achievement] = relationship(back_populates='user_achievement')
