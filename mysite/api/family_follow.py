@@ -53,7 +53,7 @@ async def update_family_follow(family_follow_id: int, family_follow: FamilyFollo
     return {'message': 'Успешно изменено'}
 
 
-@family_follow_router.delete('/{family_follow_id}/', response_model=FamilyFollowOutSchema)
+@family_follow_router.delete('/{family_follow_id}/', response_model=dict)
 async def detail_family_follow(family_follow_id: int, db: Session = Depends(get_db)):
     family_follow_db = db.query(FamilyFollow).filter(FamilyFollow.id == family_follow_id).first()
     if not family_follow_db:

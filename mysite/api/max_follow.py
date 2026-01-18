@@ -17,11 +17,11 @@ async def get_db():
 
 @max_follow_router.post('/', response_model=MaxFollowOutSchema)
 async def create_max_follow(max_follow: MaxFollowInputSchema, db: Session = Depends(get_db)):
-    MaxFollow.db = MaxFollow(**MaxFollow.dict())
-    db.add(MaxFollow.db)
+    max_follow_db = MaxFollow(**max_follow.dict())
+    db.add(max_follow_db)
     db.commit()
-    db.refresh(MaxFollow.db)
-    return MaxFollow.db
+    db.refresh(max_follow_db)
+    return max_follow_db
 
 @max_follow_router.get('/', response_model=List[MaxFollowOutSchema])
 async def list_max_follow(db: Session = Depends(get_db)):
