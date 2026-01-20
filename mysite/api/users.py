@@ -43,7 +43,7 @@ async def detail_user(user_id: int, db: Session = Depends(get_db)):
     streak = user.user_streak[0].current_streak if user.user_streak else 0
 
     levels = [{'id': lvl.id, 'course_id': lvl.course_id, 'level': lvl.level,
-               'experience': lvl.experience, 'xp_to_next_level': lvl.xp_to_next_level()}
+               'experience': lvl.experience, 'xp_to_next_level': lvl.xp_to_next_level}
         for lvl in user.lesson_user]
 
     achievements = [{'id': a.achievement_user.id, 'title': a.achievement_user.title}
@@ -55,11 +55,7 @@ async def detail_user(user_id: int, db: Session = Depends(get_db)):
 
 
 @user_router.put('/{user_id}/', response_model=dict)
-async def update_user(
-        user_id: int,
-        user: UserProfileInputSchema,
-        db: Session = Depends(get_db)
-):
+async def update_user(user_id: int, user: UserProfileInputSchema, db: Session = Depends(get_db)):
     user_db = db.query(UserProfile).filter(UserProfile.id == user_id).first()
 
     if not user_db:
@@ -75,17 +71,11 @@ async def update_user(
 
 
 @user_router.delete('/{user_id}/', response_model=dict)
-async def delete_user(
-        user_id: int,
-        db: Session = Depends(get_db)
-):
+async def delete_user(user_id: int, db: Session = Depends(get_db)):
     user_db = db.query(UserProfile).filter(UserProfile.id == user_id).first()
 
     if not user_db:
-        raise HTTPException(
-            detail='Мындай колдонуучу жок',
-            status_code=400
-        )
+        raise HTTPException(detail='Мындай колдонуучу жок', status_code=400)
 
     db.delete(user_db)
     db.commit()

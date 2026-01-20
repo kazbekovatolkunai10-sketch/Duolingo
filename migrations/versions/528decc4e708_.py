@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 086e8ee37218
+Revision ID: 528decc4e708
 Revises: 
-Create Date: 2026-01-19 01:02:50.943037
+Create Date: 2026-01-19 16:22:40.563592
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '086e8ee37218'
+revision: str = '528decc4e708'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -141,6 +141,18 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['course_id'], ['course.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('lesson_level',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('course_id', sa.Integer(), nullable=False),
+    sa.Column('level', sa.Integer(), server_default='1', nullable=False),
+    sa.Column('experience', sa.Integer(), server_default='0', nullable=False),
+    sa.Column('max_level', sa.Integer(), server_default='100', nullable=False),
+    sa.ForeignKeyConstraint(['course_id'], ['course.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['profile.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id', 'course_id')
+    )
     op.create_table('refresh_token',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -189,17 +201,6 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_lesson_completion_lesson_id'), 'lesson_completion', ['lesson_id'], unique=False)
     op.create_index(op.f('ix_lesson_completion_user_id'), 'lesson_completion', ['user_id'], unique=False)
-    op.create_table('lesson_level',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('lesson_id', sa.Integer(), nullable=False),
-    sa.Column('level', sa.Integer(), server_default='1', nullable=False),
-    sa.Column('experience', sa.Integer(), server_default='0', nullable=False),
-    sa.Column('max_level', sa.Integer(), server_default='100', nullable=False),
-    sa.ForeignKeyConstraint(['lesson_id'], ['lesson.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['profile.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('message',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('chat_id', sa.Integer(), nullable=False),
@@ -247,7 +248,6 @@ def downgrade() -> None:
     op.drop_table('user_progress')
     op.drop_table('rating')
     op.drop_table('message')
-    op.drop_table('lesson_level')
     op.drop_index(op.f('ix_lesson_completion_user_id'), table_name='lesson_completion')
     op.drop_index(op.f('ix_lesson_completion_lesson_id'), table_name='lesson_completion')
     op.drop_table('lesson_completion')
@@ -257,6 +257,7 @@ def downgrade() -> None:
     op.drop_table('user_achievement')
     op.drop_table('streak')
     op.drop_table('refresh_token')
+    op.drop_table('lesson_level')
     op.drop_table('lesson')
     op.drop_table('history')
     op.drop_table('follow')

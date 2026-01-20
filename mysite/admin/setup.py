@@ -4,7 +4,7 @@ from .views import (UserProfileAdmin, FollowAdmin, SuperFollowAdmin,
                     OptionAdmin, UserProgressAdmin, XPHistoryAdmin,
                     StreakAdmin, ChatAdmin, ChatMemberAdmin,
                     MessageAdmin, AddFriendsAdmin, CountryAdmin,
-                    RatingAdmin, LessonLevelAdmin, AchievementAdmin)
+                    RatingAdmin, LanguageProgressAdmin, AchievementAdmin)
 from fastapi import FastAPI
 from sqladmin import Admin
 from Duolingo.mysite.database.db import engine
@@ -31,5 +31,5 @@ def setup_admin(mysite_app: FastAPI):
     admin.add_view(AddFriendsAdmin)
     admin.add_view(CountryAdmin)
     admin.add_view(RatingAdmin)
-    admin.add_view(LessonLevelAdmin)
+    admin.add_view(LanguageProgressAdmin)
     admin.add_view(AchievementAdmin)

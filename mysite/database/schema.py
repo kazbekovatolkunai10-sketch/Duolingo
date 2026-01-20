@@ -67,16 +67,16 @@ class UserProfileListSchema(BaseModel):
         from_attributes = True
 
 
-class LessonLevelInputSchema(BaseModel):
-    course_id: int
+class LanguageProgressInputSchema(BaseModel):
+    language_id: int
     level: int
     experience: int
     max_level: int
 
 
-class LessonLevelOutSchema(BaseModel):
+class LanguageProgressOutSchema(BaseModel):
     id: int
-    course_id: int
+    language_id: int
     level: int
     experience: int
     xp_to_next_level: int
@@ -95,7 +95,7 @@ class UserProfileDetailSchema(BaseModel):
     username: str
 
     streak: int
-    levels: List[LessonLevelOutSchema]
+    levels: List[LanguageProgressOutSchema]
     achievements: List[AchievementMiniOutSchema]
 
     class Config:

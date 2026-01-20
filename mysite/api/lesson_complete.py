@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from Duolingo.mysite.database.models import LessonCompletion, Lesson, LessonLevel, UserProfile, Streak
+from Duolingo.mysite.database.models import LessonCompletion, Lesson, LanguageProgress, UserProfile, Streak
 from Duolingo.mysite.database.schema import LessonCompletionInputSchema, CompleteLessonResponseSchema
 from Duolingo.mysite.database.db import SessionLocal
 from Duolingo.mysite.api.deps import get_current_user
@@ -19,52 +19,66 @@ async def get_db():
         db.close()
 
 
-@lesson_completion_router.post("/", response_model=CompleteLessonResponseSchema)
-async def complete_lesson(lesson_complete: LessonCompletionInputSchema, user: UserProfile = Depends(get_current_user),
-                          db: Session = Depends(get_db)):
-    lesson_id = lesson_complete.lesson_id
+@lesson_completion_router.post('/lesson_completion/', response_model=CompleteLessonResponseSchema)
+async def complete_lesson(lesson_complete: LessonCompletionInputSchema, db: Session = Depends(get_db),
+                          user: UserProfile = Depends(get_current_user)):
+    lesson = db.query(Lesson).filter(Lesson.id == lesson_complete.lesson_id).first()
+    if not lesson:
+        raise HTTPException(status_code=404, detail='Урок не найден')
 
-    completed = (
-        db.query(LessonCompletion).filter(LessonCompletion.user_id == user.id, LessonCompletion.lesson_id == lesson_id,).first())
-    if completed:
+    if lesson.is_locked:
+        raise HTTPException(status_code=400, detail='Урок заблокирован')
+
+    exists = db.query(LessonCompletion).filter(LessonCompletion.user_id == user.id,LessonCompletion.lesson_id == lesson.id).first()
+    if exists:
         raise HTTPException(status_code=400, detail='Урок уже завершён')
 
-    lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
-    if not lesson:
-        raise HTTPException(status_code=400, detail='Урок не найден')
-
     course_id = lesson.course_id
+    language_id = lesson.course_lesson.language_id
 
-    completion = LessonCompletion(user_id=user.id, lesson_id=lesson_id)
+    if lesson.order > 1:
+        prev_lesson = db.query(Lesson).filter(Lesson.course_id == course_id, Lesson.order == lesson.order - 1).first()
+
+        if not prev_lesson:
+            raise HTTPException(status_code=400, detail='Предыдущий урок не найден')
+
+        prev_completed = db.query(LessonCompletion).filter(LessonCompletion.user_id == user.id, LessonCompletion.lesson_id == prev_lesson.id).first()
+
+        if not prev_completed:
+            raise HTTPException(status_code=400, detail='Сначала пройди предыдущий урок')
+
+    completion = LessonCompletion(user_id=user.id, lesson_id=lesson.id)
     db.add(completion)
+    db.flush()
 
-    lesson_level = (db.query(LessonLevel).filter(LessonLevel.user_id == user.id, LessonLevel.course_id == course_id).first())
+    progress = db.query(LanguageProgress).filter(LanguageProgress.user_id == user.id, LanguageProgress.language_id == language_id).first()
 
-    if not lesson_level:
-        lesson_level = LessonLevel(user_id=user.id, course_id=course_id)
-        db.add(lesson_level)
+    if not progress:
+        progress = LanguageProgress(user_id=user.id, language_id=language_id)
+        db.add(progress)
         db.flush()
 
-    lesson_level.add_experience(lesson.xp_reward)
+    progress.add_experience(lesson.xp_reward)
+
+    next_lesson = db.query(Lesson).filter(Lesson.course_id == lesson.course_id, Lesson.order == lesson.order + 1).first()
+
+    if next_lesson:
+        next_lesson.is_locked = False
+        db.add(next_lesson)
 
     streak = db.query(Streak).filter(Streak.user_id == user.id).first()
+
     if not streak:
-        streak = Streak(user_id=user.id, current_streak=0, last_activity=None)
+        streak = Streak(usser_id=user.id, current_streak=0)
         db.add(streak)
         db.flush()
 
-    streak.update_after_lesson()
-
-    next_lesson = (
-        db.query(Lesson).filter(Lesson.course_id == course_id,Lesson.order > lesson.order,).order_by(Lesson.order.asc()).first())
-    if next_lesson:
-        next_lesson.is_locked = False
+    current_streak = streak.current_streak
 
     db.commit()
-
     db.refresh(completion)
-    db.refresh(lesson_level)
-    db.refresh(streak)
+    db.refresh(progress)
 
-    return {'completion': completion, 'level': lesson_level.level, 'experience': lesson_level.experience,
-            'xp_to_next_level': lesson_level.exp_to_next_level(), 'streak': streak.current_streak}
+    return {'completion': {'id': completion.id, 'user_id': completion.user_id, 'lesson_id': completion.lesson_id},
+            'level': progress.level, 'experience': progress.experience, 'xp_to_next_level': progress.xp_to_next_level,
+            'streak': streak.current_streak}

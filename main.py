@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import uvicorn
 from Duolingo.mysite.api import (country, users, follow, super_follow, family_follow, max_follow, language, course,
-                                 lesson, exercise, chat, chat_member, message, add_friends, lesson_level,
+                                 lesson, exercise, chat, chat_member, message, add_friends, language_progress,
                                  lesson_complete, achievement, auth)
 from Duolingo.mysite.admin import setup
 
@@ -21,7 +21,7 @@ duolingo_app.include_router(chat.chat_router)
 duolingo_app.include_router(chat_member.chat_member_router)
 duolingo_app.include_router(message.message_router)
 duolingo_app.include_router(add_friends.add_friends_router)
-duolingo_app.include_router(lesson_level.lesson_level_router)
+duolingo_app.include_router(language_progress.language_progress_router)
 duolingo_app.include_router(lesson_complete.lesson_completion_router)
 duolingo_app.include_router(auth.auth_router)
 duolingo_app.setup()

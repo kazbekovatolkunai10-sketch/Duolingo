@@ -1,7 +1,7 @@
 from Duolingo.mysite.database.models import (UserProfile, RefreshToken, Follow, SuperFollow, FamilyFollow,
                                              MaxFollow, Language, Course, Lesson, Exercise, Option,
                                              UserProgress, XPHistory, Streak, Chat, ChatMember, Message,
-                                             AddFriends, Country, Rating, LessonLevel, Achievement,
+                                             AddFriends, Country, Rating, LanguageProgress, Achievement,
                                              UserAchievement, LessonCompletion)
 from sqladmin import ModelView
 
@@ -66,8 +66,8 @@ class CountryAdmin(ModelView, model=Country):
 class RatingAdmin(ModelView, model=Rating):
     column_list = [Rating.user_id, Rating.streak_id]
 
-class LessonLevelAdmin(ModelView, model=LessonLevel):
-    column_list = [LessonLevel.level]
+class LanguageProgressAdmin(ModelView, model=LanguageProgress):
+    column_list = [LanguageProgress.level]
 
 class LessonCompletionAdmin(ModelView, model=LessonCompletion):
     column_list = [LessonCompletion.date_completed]
