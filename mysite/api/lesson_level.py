@@ -4,7 +4,7 @@ from typing import List
 from mysite.database.models import LessonLevel, UserProfile
 from mysite.database.schema import LessonLevelOutSchema
 from mysite.database.db import SessionLocal
-from mysite.api.deps import get_current_user
+from mysite.api.api_chat.deps import get_current_user
 
 lesson_level_router = APIRouter(prefix='/lesson_levels', tags=['Lesson Levels'])
 

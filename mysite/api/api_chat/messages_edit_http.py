@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from mysite.api.api_chat.deps import get_db, get_current_user
-from mysite.database.models_chat import ChatMessage, GroupPeople, UserProfile
+from mysite.database.models import ChatMessage, GroupPeople, UserProfile
 from mysite.api.api_chat.ws_messages import manager  # ✅ импорт менеджера WS (важно)
 
 messages_edit_router = APIRouter(prefix="/messages", tags=["Messages Edit/Delete"])

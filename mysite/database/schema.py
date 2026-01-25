@@ -1,43 +1,72 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
-from typing import Optional
+from typing import Optional, List
 from datetime import date, datetime
-from .models import RoleChoices, LevelChoices, TypeChoices
+
+from .models import RoleChoices, LevelChoices, TypeChoices  # TypeChoices можно оставить если используешь где-то ещё
 
 
+# =========================
+# BASE
+# =========================
 class ORMBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class UserProfileInputSchema(BaseModel):
-    avatar: Optional[str] = None
-    first_name: str
-    last_name: str
+# =========================
+# USER
+# =========================
+class UserCreateSchema(BaseModel):
     username: str
     email: EmailStr
     password: str
-    phone_number: Optional[str] = None
-    is_active: bool = False
+
+
+class UserLoginSchema(BaseModel):
+    email: EmailStr
+    password: str
 
 
 class UserProfileOutSchema(ORMBase):
     id: int
     avatar: Optional[str] = None
-    first_name: str
-    last_name: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     username: str
     email: EmailStr
-    password: str
     phone_number: Optional[str] = None
     role: RoleChoices
     is_active: bool
     date_register: datetime
 
 
-class UserProfileLoginSchema(BaseModel):
+class UserProfileInputSchema(BaseModel):
+    avatar: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone_number: Optional[str] = None
+
+
+class UserResponseSchema(BaseModel):
+    id: int
+    email: EmailStr
     username: str
-    password: str
+    date_register: datetime
+
+    class Config:
+        from_attributes = True
 
 
+
+# если тебе нужно отдавать "короткого пользователя" в списках:
+class UserShortOut(ORMBase):
+    id: int
+    username: str
+    email: EmailStr
+
+
+# =========================
+# FOLLOW
+# =========================
 class FollowInputSchema(BaseModel):
     following_id: int
     follower_id: int
@@ -60,17 +89,6 @@ class SuperFollowOutSchema(ORMBase):
     description: str
 
 
-class FamilyFollowInputSchema(BaseModel):
-    title: str
-    description: str
-
-
-class FamilyFollowOutSchema(ORMBase):
-    id: int
-    title: str
-    description: str
-
-
 class MaxFollowInputSchema(BaseModel):
     title: str
     description: str
@@ -82,6 +100,11 @@ class MaxFollowOutSchema(ORMBase):
     description: str
 
 
+
+# =========================
+# LANGUAGE / COURSE / LESSON / ...
+# (твои duolingo-схемы можно оставить почти без изменений)
+# =========================
 class LanguageInputSchema(BaseModel):
     code: str
     name: str
@@ -132,6 +155,7 @@ class ExerciseInputSchema(BaseModel):
     lesson_id: int
     questions: str
     correct_answer: str
+    type: LevelChoices
 
 
 class ExerciseOutSchema(ORMBase):
@@ -164,6 +188,7 @@ class UserProgressOutSchema(ORMBase):
     lesson_id: int
     completed: bool
     score: int
+    xp_earned: int
     completed_date: datetime
 
 
@@ -181,56 +206,11 @@ class XPHistoryOutSchema(ORMBase):
     created_date: datetime
 
 
-class StreakInputSchema(BaseModel):
-    user_id: int
-    current_streak: int
-
-
 class StreakOutSchema(ORMBase):
     id: int
     user_id: int
-    current_streak: int
+    current_steak: int
     last_activity: date
-
-
-class ChatInputSchema(BaseModel):
-    type: TypeChoices
-    language_id: int
-
-
-class ChatOutSchema(ORMBase):
-    id: int
-    type: TypeChoices
-    language_id: int
-    create_at: datetime
-
-
-class ChatMemberInputSchema(BaseModel):
-    chat_id: int
-    user_id: int
-
-
-class ChatMemberOutSchema(ORMBase):
-    id: int
-    chat_id: int
-    user_id: int
-    joined_at: datetime
-
-
-class MessageInputSchema(BaseModel):
-    chat_id: int
-    sender_id: int
-    content: str
-    is_read: bool = False
-
-
-class MessageOutShema(ORMBase):
-    id: int
-    chat_id: int
-    sender_id: int
-    content: str
-    is_read: bool
-    created_at: datetime
 
 
 class AddFriendsInputSchema(BaseModel):
@@ -299,3 +279,96 @@ class AchievementOutSchema(ORMBase):
     id: int
     title: str
     code: str
+
+
+# =========================
+# CHAT (НОВАЯ ВЕРСИЯ) — под твои модели:
+# ChatGroup / GroupPeople / ChatMessage / ChatReadState
+# =========================
+class GroupCreateIn(BaseModel):
+    title: str
+    is_private: bool = False
+
+
+class GroupOut(ORMBase):
+    id: int
+    owner_id: int
+    title: str
+    create_date: datetime
+    is_private: bool
+
+
+class AddMembersIn(BaseModel):
+    user_ids: List[int]
+
+
+class GroupMemberOut(ORMBase):
+    id: int
+    group_id: int
+    user_id: int
+    joined_date: date
+    user: UserShortOut
+
+
+class GroupDetailOut(ORMBase):
+    id: int
+    owner_id: int
+    title: str
+    create_date: datetime
+    is_private: bool
+    members: List[GroupMemberOut] = []
+
+
+class MessageCreateIn(BaseModel):
+    group_id: int
+    text: str
+
+
+class MessageOut(ORMBase):
+    id: int
+    group_id: int
+    user_id: int
+    text: str
+    created_date: datetime
+    is_deleted: bool
+    edited_at: Optional[datetime] = None
+
+
+class MessagesPageOut(BaseModel):
+    group_id: int
+    items: List[MessageOut]
+    has_more: bool
+    before_id: Optional[int] = None
+
+
+class LastMessageOut(ORMBase):
+    id: int
+    user_id: int
+    text: str
+    created_date: datetime
+
+
+class ChatListItemOut(BaseModel):
+    group_id: int
+    title: Optional[str] = None
+    is_private: bool
+    members_count: int
+    last_message: Optional[LastMessageOut] = None
+    unread_count: int
+
+
+class ReadStateOut(ORMBase):
+    id: int
+    group_id: int
+    user_id: int
+    last_read_message_id: Optional[int] = None
+    updated_at: datetime
+
+
+# =========================
+# TOKENS
+# =========================
+class TokenPairOut(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"

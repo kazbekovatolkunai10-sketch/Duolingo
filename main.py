@@ -4,9 +4,9 @@ import uvicorn
 
 from mysite.admin.setup import setup_admin
 from mysite.api import (
-    users, follow, language, superFollow, chat_member, message, add_friends,
+    follow, language, superFollow, add_friends,
     country, lesson_level, achievement, course, lesson, maxFollow,
-    auth, chat, lesson_complete
+    lesson_complete
 )
 
 from mysite.api.api_chat.auth import auth_router
@@ -33,10 +33,7 @@ duolingo_app.add_middleware(
 
 setup_admin(duolingo_app)
 
-duolingo_app.include_router(chat.chat_router)
-
 # API
-duolingo_app.include_router(users.user_router)
 duolingo_app.include_router(follow.follow_router)
 duolingo_app.include_router(superFollow.super_follow_router)
 # duolingo_app.include_router(message.message_router)
@@ -47,9 +44,7 @@ duolingo_app.include_router(achievement.achievement_router)
 duolingo_app.include_router(language.language_router)
 duolingo_app.include_router(course.course_router)
 duolingo_app.include_router(lesson.lesson_router)
-duolingo_app.include_router(chat_member.chat_member_router)
 duolingo_app.include_router(maxFollow.max_follow_router)
-duolingo_app.include_router(auth.auth_router)
 duolingo_app.include_router(lesson_complete.lesson_completion_router)
 
 

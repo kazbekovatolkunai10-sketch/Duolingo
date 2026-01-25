@@ -3,8 +3,9 @@ from sqladmin import ModelView
 from mysite.database.models import (
     UserProfile, RefreshToken, Follow, SuperFollow, FamilyFollow, MaxFollow,
     Language, Course, Lesson, Exercise, Option, UserProgres, XPHistory, Streak,
-    Chat, ChatMember, Message, AddFriends, Country, Rating, LessonLevel,
-    Achievement, UserAchievement, LessonCompletion
+    AddFriends, Country, Rating, LessonLevel, Achievement, UserAchievement, LessonCompletion,
+    # ✅ NEW CHAT MODELS
+    ChatGroup, GroupPeople, ChatMessage, ChatReadState
 )
 
 
@@ -27,7 +28,6 @@ class RefreshTokenAdmin(ModelView, model=RefreshToken):
 class FollowAdmin(ModelView, model=Follow):
     name = "Follow"
     name_plural = "Follows"
-    # relationship-колонки показываем как "following" и "follower"
     column_list = ["id", "following_id", "follower_id", "following", "follower"]
 
     column_formatters = {
@@ -95,13 +95,15 @@ class ExerciseAdmin(ModelView, model=Exercise):
 class OptionAdmin(ModelView, model=Option):
     name = "Option"
     name_plural = "Options"
-    # Не трогаем Option.exercise.questions напрямую!
     column_list = ["id", "exercise_id", "exercise"]
     column_sortable_list = ["id", "exercise_id"]
 
     column_formatters = {
-        "exercise": lambda m, a: (m.exercise.questions[:80] + "…") if (m.exercise and m.exercise.questions and len(m.exercise.questions) > 80)
-        else (m.exercise.questions if m.exercise else None)
+        "exercise": lambda m, a: (
+            (m.exercise.questions[:80] + "…")
+            if (m.exercise and m.exercise.questions and len(m.exercise.questions) > 80)
+            else (m.exercise.questions if m.exercise else None)
+        )
     }
 
 
@@ -123,37 +125,13 @@ class XPHistoryAdmin(ModelView, model=XPHistory):
 class StreakAdmin(ModelView, model=Streak):
     name = "Streak"
     name_plural = "Streaks"
-    # у тебя в модели поле current_steak (опечатка), поэтому так и оставляем
     column_list = ["id", "user_id", "current_steak", "last_activity"]
     column_sortable_list = ["id", "user_id", "current_steak", "last_activity"]
-
-
-class ChatAdmin(ModelView, model=Chat):
-    name = "Chat"
-    name_plural = "Chats"
-    column_list = ["id", "type", "language_id", "create_at"]
-    column_sortable_list = ["id", "create_at", "language_id", "type"]
-
-
-class ChatMemberAdmin(ModelView, model=ChatMember):
-    name = "Chat Member"
-    name_plural = "Chat Members"
-    column_list = ["id", "chat_id", "user_id", "joined_at"]
-    column_sortable_list = ["id", "chat_id", "user_id", "joined_at"]
-
-
-class MessageAdmin(ModelView, model=Message):
-    name = "Message"
-    name_plural = "Messages"
-    column_list = ["id", "chat_id", "sender_id", "content", "is_read", "created_at"]
-    column_searchable_list = ["content"]
-    column_sortable_list = ["id", "chat_id", "sender_id", "is_read", "created_at"]
 
 
 class AddFriendsAdmin(ModelView, model=AddFriends):
     name = "Add Friend"
     name_plural = "Add Friends"
-    # relationship красиво через formatter
     column_list = ["id", "user_id", "add_user"]
 
     column_formatters = {
@@ -178,7 +156,6 @@ class RatingAdmin(ModelView, model=Rating):
 
     column_formatters = {
         "user_rating": lambda m, a: m.user_rating.username if m.user_rating else None,
-        # В модели Streak поле current_steak, не current_streak
         "streak_rating": lambda m, a: m.streak_rating.current_steak if m.streak_rating else None,
     }
 
@@ -210,3 +187,36 @@ class UserAchievementAdmin(ModelView, model=UserAchievement):
     name_plural = "User Achievements"
     column_list = ["id", "user_id", "achievement_id", "date_received"]
     column_sortable_list = ["id", "user_id", "achievement_id", "date_received"]
+
+
+# =========================
+# ✅ CHAT ADMIN (НОВЫЕ МОДЕЛИ)
+# =========================
+class ChatGroupAdmin(ModelView, model=ChatGroup):
+    name = "Chat Group"
+    name_plural = "Chat Groups"
+    column_list = ["id", "owner_id", "title", "is_private", "create_date"]
+    column_searchable_list = ["title"]
+    column_sortable_list = ["id", "create_date", "owner_id", "is_private"]
+
+
+class GroupPeopleAdmin(ModelView, model=GroupPeople):
+    name = "Group Member"
+    name_plural = "Group Members"
+    column_list = ["id", "group_id", "user_id", "joined_date"]
+    column_sortable_list = ["id", "group_id", "user_id", "joined_date"]
+
+
+class ChatMessageAdmin(ModelView, model=ChatMessage):
+    name = "Chat Message"
+    name_plural = "Chat Messages"
+    column_list = ["id", "group_id", "user_id", "text", "is_deleted", "created_date", "edited_at"]
+    column_searchable_list = ["text"]
+    column_sortable_list = ["id", "group_id", "user_id", "created_date", "is_deleted"]
+
+
+class ChatReadStateAdmin(ModelView, model=ChatReadState):
+    name = "Read State"
+    name_plural = "Read States"
+    column_list = ["id", "group_id", "user_id", "last_read_message_id", "updated_at"]
+    column_sortable_list = ["id", "group_id", "user_id", "updated_at"]

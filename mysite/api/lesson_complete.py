@@ -4,7 +4,7 @@ from typing import List
 from mysite.database.models import LessonCompletion, Lesson, LessonLevel, UserProfile, Streak
 from mysite.database.schema import LessonCompletionInputSchema, LessonCompletionOutSchema
 from mysite.database.db import SessionLocal
-from mysite.api.deps import get_current_user
+from mysite.api.api_chat.deps import get_current_user
 from mysite.api.achievement import give_achievement_if_not_exists
 from datetime import date
 

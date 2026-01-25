@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from mysite.database.db import SessionLocal
-from mysite.database.models_chat import UserProfile
-from mysite.database.schema_chat import UserResponseSchema
+from mysite.database.models import UserProfile
+from mysite.database.schema import UserResponseSchema, UserProfileOutSchema, UserProfileInputSchema
 
 user_router = APIRouter(prefix="/user", tags=["User"])
 
@@ -28,6 +28,20 @@ def user_detail(user_id: int, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="Not found")
     return user
+
+
+@user_router.put("/{user_id}/", response_model=dict)
+def update_user(user_id: int, user: UserProfileInputSchema, db: Session = Depends(get_db)):
+    user_db = db.query(UserProfile).filter(UserProfile.id == user_id).first()
+    if not user_db:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    for key, value in user.model_dump(exclude_unset=True).items():
+        setattr(user_db, key, value)
+
+    db.commit()
+    db.refresh(user_db)
+    return {"message": "Updated"}
 
 
 @user_router.delete("/{user_id}")

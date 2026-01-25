@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from mysite.api.api_chat.deps import get_db, get_current_user
-from mysite.database.models_chat import ChatMessage, GroupPeople, UserProfile
-from mysite.database.schema_chat import MessagesPageOut, MessageOut
+from mysite.database.models import ChatMessage, GroupPeople, UserProfile
+from mysite.database.schema import MessagesPageOut, MessageOut
 
 messages_http = APIRouter(prefix="/groups", tags=["Messages (HTTP)"])
 

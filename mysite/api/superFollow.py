@@ -1,70 +1,91 @@
-from fastapi import APIRouter, Depends, HTTPException
-from mysite.database.models import SuperFollow
-from mysite.database.schema import SuperFollowOutSchema, SuperFollowInputSchema
-from mysite.database.db import SessionLocal
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 
-super_follow_router = APIRouter(prefix='/super_follow', tags=['Super Follow'])
+from mysite.database.models import SuperFollow
+from mysite.database.schema import SuperFollowOutSchema, SuperFollowInputSchema
+from mysite.database.db import SessionLocal
 
-async def get_db():
+super_follow_router = APIRouter(prefix="/super_follow", tags=["Super Follow"])
+
+
+def get_db():
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
 
-@super_follow_router.post('/', response_model=SuperFollowOutSchema)
-def create_follow(
-    follow: SuperFollowInputSchema, db: Session = Depends(get_db)):
 
-    follow = SuperFollow(**follow.dict())
-    db.add(follow)
+# ✅ CREATE
+@super_follow_router.post("/", response_model=SuperFollowOutSchema, status_code=201)
+def create_super_follow(
+    payload: SuperFollowInputSchema,
+    db: Session = Depends(get_db),
+):
+    obj = SuperFollow(**payload.model_dump())
+    db.add(obj)
     db.commit()
-    db.refresh(follow)
-    return follow
+    db.refresh(obj)
+    return obj
 
 
-@super_follow_router.get('/', response_model=List[SuperFollowOutSchema])
-async def list_super_follow(db: Session = Depends(get_db)):
-    return db.query(SuperFollow).all()
+# ✅ LIST
+@super_follow_router.get("/", response_model=List[SuperFollowOutSchema])
+def list_super_follow(db: Session = Depends(get_db)):
+    return db.query(SuperFollow).order_by(SuperFollow.id.desc()).all()
 
 
-@super_follow_router.get('/{super_follow_id}/', response_model=SuperFollowOutSchema)
-async def detail_user(super_follow_id: int, db: Session = Depends(get_db)):
-    super_follow_db = db.query(SuperFollow).filter(SuperFollow.id == super_follow_id).first()
+# ✅ DETAIL
+@super_follow_router.get("/{super_follow_id}", response_model=SuperFollowOutSchema)
+def detail_super_follow(
+    super_follow_id: int,
+    db: Session = Depends(get_db),
+):
+    obj = db.query(SuperFollow).filter(SuperFollow.id == super_follow_id).first()
+    if not obj:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="SuperFollow not found",
+        )
+    return obj
 
-    if not super_follow_db:
-        raise HTTPException(detail='маалымат жок', status_code=400)
 
-    return super_follow_db
+# ✅ UPDATE (partial)
+@super_follow_router.patch("/{super_follow_id}", response_model=SuperFollowOutSchema)
+def update_super_follow(
+    super_follow_id: int,
+    payload: SuperFollowInputSchema,
+    db: Session = Depends(get_db),
+):
+    obj = db.query(SuperFollow).filter(SuperFollow.id == super_follow_id).first()
+    if not obj:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="SuperFollow not found",
+        )
 
-
-@super_follow_router.put('/{super_follow_id}/', response_model=dict)
-async def update_super_follow(follow_id: int, follow: SuperFollowInputSchema,
-                             db: Session = Depends(get_db)):
-
-    follow_db = (db.query(SuperFollow).filter(SuperFollow.id == follow_id).first())
-
-    if not follow_db:
-        raise HTTPException(detail='Мындай follow жок',status_code=400)
-
-    for follow_key, follow_value in follow.dict().items():
-        setattr(follow_db, follow_key, follow_value)
+    for key, value in payload.model_dump(exclude_unset=True).items():
+        setattr(obj, key, value)
 
     db.commit()
-    db.refresh(follow_db)
+    db.refresh(obj)
+    return obj
 
-    return {'message': 'SuperFollow өзгөртүлдү'}
 
+# ✅ DELETE
+@super_follow_router.delete("/{super_follow_id}", response_model=dict)
+def delete_super_follow(
+    super_follow_id: int,
+    db: Session = Depends(get_db),
+):
+    obj = db.query(SuperFollow).filter(SuperFollow.id == super_follow_id).first()
+    if not obj:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="SuperFollow not found",
+        )
 
-@super_follow_router.delete('/{super_follow_id}/', response_model=dict)
-async def delete_follow(follow_id: int, db: Session = Depends(get_db)):
-    follow_db = (db.query(SuperFollow).filter(SuperFollow.id == follow_id).first())
-
-    if not follow_db:
-        raise HTTPException(detail='Мындай follow жок', status_code=400)
-
-    db.delete(follow_db)
+    db.delete(obj)
     db.commit()
-    return {'message': 'follow өчүрүлдү'}
+    return {"message": "deleted"}

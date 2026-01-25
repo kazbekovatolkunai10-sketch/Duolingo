@@ -2,8 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from mysite.api.api_chat.deps import get_db, get_current_user
-from mysite.database.models_chat import ChatGroup, GroupPeople, UserProfile
-from mysite.database.schema_chat import GroupCreateIn, GroupOut
+from mysite.database.models import ChatGroup, GroupPeople, UserProfile
+from mysite.database.schema import GroupCreateIn, GroupOut, GroupDetailOut, GroupMemberOut
+from sqlalchemy.orm import selectinload
+from typing import List
 
 group_http = APIRouter(prefix="/groups", tags=["Groups"])
 
@@ -63,3 +65,14 @@ def group_detail(
         raise HTTPException(status_code=403, detail="Not a member")
 
     return g
+
+
+@group_http.get("/{group_id}/members", response_model=List[GroupMemberOut])
+def list_members(group_id: int, db: Session = Depends(get_db)):
+    members = (
+        db.query(GroupPeople)
+        .options(selectinload(GroupPeople.user))
+        .filter(GroupPeople.group_id == group_id)
+        .all()
+    )
+    return members

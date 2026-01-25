@@ -6,7 +6,7 @@ from jose import jwt, JWTError
 from sqlalchemy.orm import Session
 
 from mysite.database.db import SessionLocal
-from mysite.database.models_chat import (
+from mysite.database.models import (
     UserProfile,
     GroupPeople,
     ChatMessage,

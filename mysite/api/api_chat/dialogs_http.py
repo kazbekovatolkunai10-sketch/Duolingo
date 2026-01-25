@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from mysite.api.api_chat.deps import get_db, get_current_user
-from mysite.database.models_chat import ChatGroup, GroupPeople, UserProfile
+from mysite.database.models import ChatGroup, GroupPeople, UserProfile
 
 dialogs_router = APIRouter(prefix="/dialogs", tags=["Dialogs"])
 
